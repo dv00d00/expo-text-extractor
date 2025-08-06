@@ -60,7 +60,9 @@ export async function extractTextFromImageData(base64Data: string): Promise<stri
  *   console.log(`Position: (${result.boundingBox.x}, ${result.boundingBox.y})`);
  * });
  */
-export async function extractTextFromImageWithDetails(uri: string): Promise<import('./ExpoTextExtractorModule').RecognizedText[]> {
+export async function extractTextFromImageWithDetails(
+  uri: string,
+): Promise<import('./ExpoTextExtractorModule').RecognizedText[]> {
   const processedUri = uri.replace('file://', '');
   return ExpoTextExtractorModule.extractTextFromImageWithDetails(processedUri);
 }
@@ -80,6 +82,8 @@ export async function extractTextFromImageWithDetails(uri: string): Promise<impo
  *   console.log(`Bounding box: ${JSON.stringify(result.boundingBox)}`);
  * });
  */
-export async function extractTextFromImageDataWithDetails(base64Data: string): Promise<import('./ExpoTextExtractorModule').RecognizedText[]> {
+export async function extractTextFromImageDataWithDetails(
+  base64Data: string,
+): Promise<import('./ExpoTextExtractorModule').RecognizedText[]> {
   return ExpoTextExtractorModule.extractTextFromImageDataWithDetails(base64Data);
 }
