@@ -18,6 +18,12 @@
           "photosPermission": "The app needs access to your photos to extract text from images.",
           "cameraPermission": "The app needs access to your camera to capture images for text extraction."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "The app needs access to your camera to capture images for text extraction."
+        }
       ]
     ],
     "ios": {

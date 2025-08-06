@@ -5,7 +5,7 @@ import {
   requestCameraPermissionsAsync,
   requestMediaLibraryPermissionsAsync,
 } from 'expo-image-picker';
-import { extractTextFromImage, isSupported } from 'expo-text-extractor';
+import { extractTextFromImage, extractTextFromImageData, isSupported } from 'expo-text-extractor';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -25,6 +25,7 @@ export default function App() {
   const [cameraPermission, setCameraPermission] = useState<PermissionStatus | null>(null);
   const [galleryPermission, setGalleryPermission] = useState<PermissionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [processingMethod, setProcessingMethod] = useState<'file' | 'base64'>('file');
 
   useEffect(() => {
     const getPermissions = async () => {
@@ -38,16 +39,29 @@ export default function App() {
     getPermissions();
   }, []);
 
-  const processImage = async (path?: string) => {
-    if (!path) return;
+  const processImage = async (path?: string, base64?: string) => {
+    if (!path && !base64) return;
 
-    setImageUri(path);
+    if (path) setImageUri(path);
     setIsLoading(true);
     setResult([]);
 
     if (isSupported) {
       try {
-        const extractedTexts = await extractTextFromImage(path);
+        let extractedTexts: string[];
+        
+        if (base64) {
+          // Use new base64 method
+          setProcessingMethod('base64');
+          extractedTexts = await extractTextFromImageData(base64);
+        } else if (path) {
+          // Use existing file method
+          setProcessingMethod('file');
+          extractedTexts = await extractTextFromImage(path);
+        } else {
+          throw new Error('No image data provided');
+        }
+        
         setResult(extractedTexts);
       } catch (error) {
         if (error instanceof Error) Alert.alert('Text Extraction Error', error.message);
@@ -74,11 +88,19 @@ export default function App() {
 
       const result = await launchImageLibraryAsync({
         mediaTypes: ['images'],
+        base64: true, // Enable base64 for demonstration
       });
 
       if (!result.canceled) {
-        const path = result.assets?.at(0)?.uri;
-        await processImage(path);
+        const asset = result.assets?.[0];
+        if (asset) {
+          // Demonstrate both methods
+          if (asset.base64) {
+            await processImage(asset.uri, asset.base64);
+          } else {
+            await processImage(asset.uri);
+          }
+        }
       }
     } catch (error) {
       if (error instanceof Error) Alert.alert('Image Pick Error', error.message);
@@ -99,11 +121,20 @@ export default function App() {
 
       const result = await launchCameraAsync({
         mediaTypes: ['images'],
+        base64: true, // Enable base64 for demonstration
+        quality: 0.8, // Optimize size for better performance
       });
 
       if (!result.canceled) {
-        const path = result.assets?.at(0)?.uri;
-        await processImage(path);
+        const asset = result.assets?.[0];
+        if (asset) {
+          // Demonstrate both methods
+          if (asset.base64) {
+            await processImage(asset.uri, asset.base64);
+          } else {
+            await processImage(asset.uri);
+          }
+        }
       }
     } catch (error) {
       if (error instanceof Error) Alert.alert('Camera Error', error.message);
@@ -144,7 +175,14 @@ export default function App() {
               <Text style={styles.loadingText}>Extracting text...</Text>
             </View>
           ) : result.length > 0 ? (
-            result.map((line, index) => <Text key={index}>{line}</Text>)
+            <>
+              <View style={styles.methodIndicator}>
+                <Text style={styles.methodText}>
+                  Method: {processingMethod === 'base64' ? 'Base64 Data' : 'File URI'}
+                </Text>
+              </View>
+              {result.map((line, index) => <Text key={index}>{line}</Text>)}
+            </>
           ) : (
             <Text style={styles.noResultsText}>No text detected</Text>
           )}
@@ -224,5 +262,16 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
     marginTop: 10,
+  },
+  methodIndicator: {
+    backgroundColor: '#f0f0f0',
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 10,
+  },
+  methodText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
   },
 });

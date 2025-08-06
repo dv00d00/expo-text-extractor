@@ -38,8 +38,41 @@ const isSupported: boolean;
 
 #### Extract Text From Image
 
-Extracts text from an image and returns the recognized text as an array.
+Extracts text from an image file and returns the recognized text as an array.
 
 ```ts
 async function extractTextFromImage(uri: string): Promise<string[]>;
+```
+
+#### Extract Text From Image Data
+
+Extracts text from base64 encoded image data and returns the recognized text as an array.
+
+```ts
+async function extractTextFromImageData(base64Data: string): Promise<string[]>;
+```
+
+**Usage with expo-camera:**
+
+```ts
+import { Camera } from 'expo-camera';
+import { extractTextFromImageData } from 'expo-text-extractor';
+
+// Take a photo with base64 data
+const photo = await camera.takePictureAsync({
+  base64: true,
+  quality: 0.8,
+});
+
+// Extract text from base64 data
+const texts = await extractTextFromImageData(photo.base64);
+```
+
+**Usage with data URIs:**
+
+```ts
+// If you have a data URI, extract the base64 part
+const dataUri = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...";
+const base64Data = dataUri.split(',')[1];
+const texts = await extractTextFromImageData(base64Data);
 ```
