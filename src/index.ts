@@ -1,6 +1,11 @@
 import ExpoTextExtractorModule from './ExpoTextExtractorModule';
 
-export type { TextBoundingBox, RecognizedText } from './ExpoTextExtractorModule';
+// Export all types from types.ts
+export * from './types';
+
+// Import and re-export specific types from the module for use in function signatures
+import type { TextBoundingBox, RecognizedText } from './ExpoTextExtractorModule';
+export type { TextBoundingBox, RecognizedText };
 
 /**
  * A boolean value that indicates whether the text extraction module is supported on the current device.
@@ -62,7 +67,7 @@ export async function extractTextFromImageData(base64Data: string): Promise<stri
  */
 export async function extractTextFromImageWithDetails(
   uri: string,
-): Promise<import('./ExpoTextExtractorModule').RecognizedText[]> {
+): Promise<RecognizedText[]> {
   const processedUri = uri.replace('file://', '');
   return ExpoTextExtractorModule.extractTextFromImageWithDetails(processedUri);
 }
@@ -84,6 +89,6 @@ export async function extractTextFromImageWithDetails(
  */
 export async function extractTextFromImageDataWithDetails(
   base64Data: string,
-): Promise<import('./ExpoTextExtractorModule').RecognizedText[]> {
+): Promise<RecognizedText[]> {
   return ExpoTextExtractorModule.extractTextFromImageDataWithDetails(base64Data);
 }
